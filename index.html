@@ -41,6 +41,37 @@
       .addTo(map)
       .bindPopup('Bienvenue à Kénitra !')
       .openPopup();
+    // Charger et afficher le fichier GeoJSON
+    fetch('./mon_fichier.geojson')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement du GeoJSON');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const coucheGeoJSON = L.geoJSON(data, {
+          style: {
+            color: 'blue',
+            weight: 2,
+            fillOpacity: 0.3
+          },
+          onEachFeature: (feature, layer) => {
+            if (feature.properties) {
+              layer.bindPopup(
+                Object.entries(feature.properties)
+                  .map(([cle, valeur]) => `<b>${cle}</b> : ${valeur}`)
+                  .join('<br>')
+              );
+            }
+          }
+        }).addTo(map);
+
+        if (coucheGeoJSON.getLayers().length > 0) {
+          map.fitBounds(coucheGeoJSON.getBounds());
+        }
+      })
+      .catch(error => console.error(error));
   </script>
 </body>
 </html>
