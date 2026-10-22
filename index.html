@@ -3,11 +3,13 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ma carte Leaflet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte interactive de Rabat</title>
 
-  <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
   <style>
     body {
@@ -15,37 +17,47 @@
       font-family: Arial, sans-serif;
     }
 
-    h2 {
+    h1 {
       text-align: center;
+      padding: 15px;
+      margin: 0;
+      background-color: #f2f2f2;
     }
 
     #map {
-      height: 500px;
+      height: 85vh;
       width: 100%;
     }
   </style>
 </head>
+
 <body>
-  <h2>Ma carte interactive</h2>
+
+  <h1>Carte interactive de Rabat</h1>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map').setView([34.261, -6.580], 13);
 
+  <script>
+    // Initialiser la carte sur Rabat
+    const map = L.map('map').setView([34.0209, -6.8416], 13);
+
+    // Ajouter le fond de carte OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    L.marker([34.261, -6.580])
+    // Ajouter un marqueur sur Rabat
+    L.marker([34.0209, -6.8416])
       .addTo(map)
-      .bindPopup('Bienvenue à Kénitra !')
+      .bindPopup('Bienvenue à Rabat !')
       .openPopup();
-    // Charger et afficher le fichier GeoJSON
-    fetch('./grass.geojson')
+
+    // Charger le fichier GeoJSON
+    fetch('./mon_fichier.geojson')
       .then(response => {
         if (!response.ok) {
-          throw new Error('Erreur lors du chargement du GeoJSON');
+          throw new Error('Impossible de charger le fichier GeoJSON : ' + response.status);
         }
         return response.json();
       })
@@ -58,20 +70,24 @@
           },
           onEachFeature: (feature, layer) => {
             if (feature.properties) {
-              layer.bindPopup(
-                Object.entries(feature.properties)
-                  .map(([cle, valeur]) => `<b>${cle}</b> : ${valeur}`)
-                  .join('<br>')
-              );
+              const contenu = Object.entries(feature.properties)
+                .map(([cle, valeur]) => `<b>${cle}</b> : ${valeur}`)
+                .join('<br>');
+
+              layer.bindPopup(contenu || 'Aucune propriété disponible');
             }
           }
         }).addTo(map);
 
+        // Cadrer les données si elles existent
         if (coucheGeoJSON.getLayers().length > 0) {
           map.fitBounds(coucheGeoJSON.getBounds());
         }
       })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error('Erreur GeoJSON :', error);
+      });
   </script>
+
 </body>
 </html>
