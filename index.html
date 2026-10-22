@@ -47,29 +47,34 @@
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
     // 2. Ajouter ici la nouvelle fonctionnalité : cliquer sur la carte
+    
 map.on('click', async function(e) {
   const lat = e.latlng.lat;
   const lon = e.latlng.lng;
 
+  // Afficher immédiatement les coordonnées
   const popup = L.popup()
     .setLatLng(e.latlng)
     .setContent(`
-      <b>Recherche du nom du lieu...</b><br>
+      <b>Position sélectionnée</b><br>
       Latitude : ${lat.toFixed(6)}<br>
-      Longitude : ${lon.toFixed(6)}
+      Longitude : ${lon.toFixed(6)}<br>
+      <br>Recherche du nom...
     `)
     .openOn(map);
 
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=fr`;
+    const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='
+      + lat + '&lon=' + lon + '&accept-language=fr';
+
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error('Recherche impossible');
+      throw new Error('Service indisponible');
     }
 
     const data = await response.json();
-    const nom = data.name || data.display_name || 'Nom indisponible';
+    const nom = data.name || data.display_name || 'Nom non disponible';
 
     popup.setContent(`
       <b>Nom du lieu :</b> ${nom}<br><br>
@@ -78,13 +83,12 @@ map.on('click', async function(e) {
     `);
   } catch (error) {
     popup.setContent(`
-      <b>Nom du lieu indisponible</b><br>
-      Latitude : ${lat.toFixed(6)}<br>
-      Longitude : ${lon.toFixed(6)}
+      <b>Nom du lieu indisponible</b><br><br>
+      <b>Latitude :</b> ${lat.toFixed(6)}<br>
+      <b>Longitude :</b> ${lon.toFixed(6)}
     `);
   }
 });
-
     // Ajouter un marqueur sur Rabat
     L.marker([34.0209, -6.8416])
       .addTo(map)
