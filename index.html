@@ -46,6 +46,44 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
+    // 2. Ajouter ici la nouvelle fonctionnalité : cliquer sur la carte
+map.on('click', async function(e) {
+  const lat = e.latlng.lat;
+  const lon = e.latlng.lng;
+
+  const popup = L.popup()
+    .setLatLng(e.latlng)
+    .setContent(`
+      <b>Recherche du nom du lieu...</b><br>
+      Latitude : ${lat.toFixed(6)}<br>
+      Longitude : ${lon.toFixed(6)}
+    `)
+    .openOn(map);
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=fr`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('Recherche impossible');
+    }
+
+    const data = await response.json();
+    const nom = data.name || data.display_name || 'Nom indisponible';
+
+    popup.setContent(`
+      <b>Nom du lieu :</b> ${nom}<br><br>
+      <b>Latitude :</b> ${lat.toFixed(6)}<br>
+      <b>Longitude :</b> ${lon.toFixed(6)}
+    `);
+  } catch (error) {
+    popup.setContent(`
+      <b>Nom du lieu indisponible</b><br>
+      Latitude : ${lat.toFixed(6)}<br>
+      Longitude : ${lon.toFixed(6)}
+    `);
+  }
+});
 
     // Ajouter un marqueur sur Rabat
     L.marker([34.0209, -6.8416])
