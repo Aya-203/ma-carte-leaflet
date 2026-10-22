@@ -54,7 +54,7 @@
       .openPopup();
 
     // Charger le fichier GeoJSON
-    fetch('./mon_fichier.geojson')
+    fetch('./grass.geojson')
       .then(response => {
         if (!response.ok) {
           throw new Error('Impossible de charger le fichier GeoJSON : ' + response.status);
